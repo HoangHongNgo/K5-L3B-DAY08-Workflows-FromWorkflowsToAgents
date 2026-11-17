@@ -4,27 +4,45 @@
 
 - Họ tên: Trần Việt Anh
 - MSSV: 2A202604029
-- Danh tính Git: `Vietzanh <154943665+Vietzanh@users.noreply.github.com>`; tài khoản GitHub theo địa chỉ noreply: `Vietzanh`
+- Danh tính Git ghi ở commit: `Vietzanh <154943665+Vietzanh@users.noreply.github.com>`; tài khoản GitHub theo địa chỉ noreply: `Vietzanh`
 
 ## 2. Phần việc phụ trách
 
-Orchestrator, investigator chỉ đọc và handoff được lọc theo allowlist.
+Shape C `orchestrator`, gồm hai checkpoint:
+
+- **CP2:** thay stub trong `src/lab8/shapes/orchestrator.py` bằng luồng orchestrator + investigator chỉ đọc, cùng chữ ký `run_claim` với các shape khác.
+- **CP3:** handoff không mang secret qua ranh giới agent, và ghi tiền an toàn khi gọi lại hoặc khi crash.
 
 ## 3. Đóng góp cụ thể
 
-Commit `6a6dbe82d2d1bf13980fba100a2e285b47263172` triển khai `src/lab8/shapes/orchestrator.py`. Orchestrator tạo handoff bằng `make_handoff`, chỉ cấp tool đọc cho investigator và ghi trace của handoff đã lọc. Investigator đọc order và tính quote; chỉ orchestrator gọi host `issue_refund` với full quote. Shape chuyển `crash_at` cho host và để `InjectedCrash` lan ra sau khi ghi trace crash.
+Commit `6a6dbe8` ("CP2, CP3 orchestrator") chỉ sửa một file, `src/lab8/shapes/orchestrator.py` (+109/−6). Luồng xử lý một claim:
+
+1. Đọc claim bằng `get_claim_view` (chỉ field cho phép, không có `parent_secret` hay `raw_headers`). Claim không tồn tại thì trả `failed`.
+2. Thiếu `order_id` thì trả `needs_info`, không ghi ledger. Không lấy mã đơn từ câu chữ trong ticket.
+3. Dựng handoff bằng `lab8.handoff.make_handoff` với `facts = {}` và chỉ ba tool đọc (`lookup_order`, `lookup_policy`, `compute_compensation`). Trace ghi handoff đã sanitize, không ghi parent context.
+4. Chạy `run_readonly_investigators`. Đơn không tìm thấy hoặc không thuộc principal thì trả `escalated`, không lộ dữ liệu đơn.
+5. Lấy quote từ `compute_compensation` trên dòng order trong DB, không dùng số ngày ghi trong ticket. Quote bằng 0 thì trả `denied`, không gọi host.
+6. Quote lớn hơn 0 thì orchestrator, là bên duy nhất ghi tiền, gọi `durability.issue_refund` với **quote đầy đủ** (không tự trừ phần đã hoàn trước, để T13, T14 đúng) và truyền `crash_at` (CP3).
+7. `InjectedCrash` được ghi vào trace rồi ném lại, không nuốt, để T12 thấy crash thật. Mọi nhánh trả về đều đi qua `finish()` nên `refund_effects` và `committed_audit_count` lấy từ ledger, trace luôn được ghi.
+
+Số lần gọi model: 2 mỗi claim (`plan`, `draft`). Model chỉ soạn chữ, không quyết định số tiền.
+
+Commit này không thêm hoặc sửa test.
 
 ## 4. Bằng chứng
 
-- Benchmark public: orchestrator đúng 70/70 trial, pass^5 14/14, cost/success 47,90 VND mô phỏng; run đối chiếu `R-orchestrator-C-002-s55`.
-- Cổng host: 54 passed; ma trận student toàn repo: 248 passed, 54 deselected; crash suite toàn repo: 20/20.
-- Self-check hidden không nhãn: orchestrator chạy 200/200 trial, không `error`, không `leak_suspect`, trace hợp lệ. Không thể tính pass rate hidden từ bộ này.
-- Giới hạn đóng góp test: commit triển khai orchestrator chưa thêm hoặc sửa test riêng; chạy test có sẵn không đáp ứng yêu cầu test cá nhân của rubric.
+Chạy trong `src/` với venv của project:
+
+- `python -m pytest -q -m student -o addopts= -k orchestrator`: **62 passed** cho shape orchestrator.
+- T11 (gọi lại cùng claim) và T12 (crash rồi resume) đều xanh trên orchestrator.
+- `python -m pytest -q` (cổng host): 54 passed, không có dòng `failed`.
+- Benchmark public: orchestrator 70/70 trial, pass^5 14/14, cost/success 47,90 VND mô phỏng; run `R-orchestrator-C-002-s55`.
+- Self-check hidden không nhãn: 200/200 trial chạy không lỗi, trace hợp lệ, không `leak_suspect`. Bộ này không thể cho pass rate hidden.
 
 ## 5. Công cụ AI đã dùng
 
-Codex hỗ trợ tổng hợp báo cáo cá nhân này từ commit, benchmark JSON và output test. Repo không ghi nhận công cụ AI đã dùng lúc triển khai orchestrator, nên không gán thêm công cụ cho thành viên. Kết quả được đối chiếu bằng pytest, benchmark và self-check, không sửa tay JSON.
+Claude Code (mô hình Claude) được dùng để đọc đề, phân tích các TODO CP2/CP3, viết bản nháp `orchestrator.py`, giải thích luồng và soạn sơ đồ, script thuyết trình. Codex hỗ trợ tổng hợp báo cáo CP5 và self-check hidden. Kết quả được kiểm bằng cách chạy ma trận student, cổng host và benchmark ở mục 4.
 
 ## 6. Tự đánh giá
 
-Theo bằng chứng kỹ thuật, orchestrator đáp ứng contract public và giữ handoff chỉ đọc: public 70/70, self-check hidden không lỗi chạy hoặc dấu hiệu lộ canary. Cost/success 47,90 VND mô phỏng cao hơn workflow và single khi public cùng đạt 70/70, nên chưa có bằng chứng để chọn orchestrator cho tác vụ này. Giới hạn còn lại là thiếu test mới hoặc sửa test trong commit cá nhân; điểm hidden chính thức và đánh giá chủ quan của thành viên không có trong repo.
+Theo bằng chứng kỹ thuật, orchestrator đáp ứng contract public và giữ handoff chỉ đọc: public 70/70, self-check hidden không lỗi chạy hoặc dấu hiệu lộ canary. Cost/success 47,90 VND mô phỏng cao hơn workflow và single khi public cùng đạt 70/70, nên chưa có bằng chứng để chọn orchestrator cho tác vụ này. Commit cá nhân chưa thêm hoặc sửa test; điểm hidden chính thức không có trong bộ self-check.
