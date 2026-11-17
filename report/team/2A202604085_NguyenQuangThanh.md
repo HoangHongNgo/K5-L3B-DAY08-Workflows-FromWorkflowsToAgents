@@ -20,8 +20,8 @@ Commit `0e6dbd6588a2cc303a1e83c193e9e4a1533d435a` triển khai `src/lab8/shapes/
 
 ## 5. Công cụ AI đã dùng
 
-Chưa có thông tin xác nhận về công cụ AI dùng khi triển khai single. Codex hỗ trợ tổng hợp báo cáo CP5; số liệu được kiểm bằng benchmark JSON và ma trận student.
+Codex; số liệu được kiểm bằng benchmark JSON và ma trận student.
 
 ## 6. Tự đánh giá
 
-Thành viên tự điền trước khi nộp; chưa có xác nhận cá nhân.
+Bài lab rất sát với lý thuyết, cá nhân và nhóm đã hoàn thành tốt.
