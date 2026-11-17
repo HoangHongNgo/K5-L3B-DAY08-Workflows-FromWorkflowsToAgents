@@ -4,15 +4,18 @@
 
 - Tên nhóm:
 - Lớp: L3A
-- Repo nhóm: `K5-L3A-DAY08-TenNhom-FromWorkflowsToAgents` (xem [SUBMISSION.md](SUBMISSION.md))
-- URL repo, nhánh nộp, commit chốt:
+- Repo đang làm việc: `K5-L3B-DAY08-Workflows-FromWorkflowsToAgents`
+- URL repo: https://github.com/HoangHongNgo/K5-L3B-DAY08-Workflows-FromWorkflowsToAgents.git
+- Nhánh đang làm việc: `main`
+- Commit chốt: (điền khi nộp)
 
 ## Thành viên
 
 | STT | Họ tên | MSSV | Email | GitHub | Vai trò |
 | --: | ------ | ---- | ----- | ------ | ------- |
-|   1 |        |      |       |        |         |
-|   2 |        |      |       |        |         |
+|   1 | Ngô Hồng Hoàng | 2A202604093 |       |        | Workflow |
+|   2 | Nguyễn Quang Thành | 2A202604085 |       |        | Single Agent |
+|   3 | Trần Việt Anh | 2A202604029 |       |        | Orchestrator |
 
 Gợi ý chia vai:
 
