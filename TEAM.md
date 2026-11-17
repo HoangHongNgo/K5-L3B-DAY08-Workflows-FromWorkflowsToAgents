@@ -2,12 +2,12 @@
 
 ## Thông tin nhóm
 
-- Tên nhóm:
+- Tên nhóm: LogiX-VN L3A (tên mô tả; nhóm chưa đặt tên riêng)
 - Lớp: L3A
 - Repo đang làm việc: `K5-L3B-DAY08-Workflows-FromWorkflowsToAgents`
 - URL repo: https://github.com/HoangHongNgo/K5-L3B-DAY08-Workflows-FromWorkflowsToAgents.git
 - Nhánh đang làm việc: `main`
-- Commit chốt: (điền khi nộp)
+- Commit code và benchmark được đánh giá: `14f96cf30576d8e6a3392a9e4723f919522c6a5f` (commit báo cáo CP5 có thể đến sau)
 
 ## Thành viên
 
@@ -28,7 +28,9 @@ Gợi ý chia vai:
 
 | Người | Vai | Commit | Test đã thêm hoặc sửa |
 | --- | --- | --- | --- |
-| | | | |
+| Ngô Hồng Hoàng | Workflow và tổng hợp CP5 | `14f96cf` (workflow, benchmark, crash) | Đã chạy `test_public_matrix.py` cho workflow; lịch sử chưa có test riêng được thêm/sửa |
+| Nguyễn Quang Thành | Single Agent | `0e6dbd6` (single shape) | Đã chạy `test_public_matrix.py` cho single; commit shape chưa có test riêng được thêm/sửa |
+| Trần Việt Anh | Orchestrator | `6a6dbe8` (orchestrator shape) | Đã chạy `test_public_matrix.py` cho orchestrator; commit shape chưa có test riêng được thêm/sửa |
 
 ## Cá nhân
 

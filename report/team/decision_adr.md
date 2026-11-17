@@ -1,30 +1,25 @@
-# Decision record
+# Decision record — CP5
 
-Điền sau dấu `:` trên cùng dòng, không xóa nhãn. Giảng viên và `python -m lab8.check_submission` (chạy trong `src/`) đọc các dòng này bằng máy. Không đổi tên hay dời file này khỏi `report/team/`.
-`Shape chọn` phải là đúng một trong: `workflow`, `single`, `orchestrator`, `swarm`. Đây là shape được chấm cổng hidden.
-
-- Shape chọn:
-- Commit hash:
-- Run id dẫn chứng:
-- Pass rate / pass^5 / seed min-max / variance:
-- Cost per success (mô phỏng, VND):
-- Crash safety:
-- Secret leak / approval bypass:
-
-Ví dụ một dòng đã điền: `- Shape chọn: workflow`, `- Crash safety: 20/20 (src/reports/crash.json)`.
+- Shape chọn: workflow
+- Commit hash: 14f96cf30576d8e6a3392a9e4723f919522c6a5f
+- Run id dẫn chứng: R-workflow-C-001-s11; đối chứng lỗi R-swarm-C-002-s55 (src/reports/benchmark.json)
+- Pass rate / pass^5 / seed min-max / variance: 70/70 = 1,000 / 14/14 = 1,000 / 1,000–1,000 / 0,000000 trên public
+- Cost per success (mô phỏng, VND): 34,285714 (tổng 2.400/70 trial pass)
+- Crash safety: 20/20 (src/reports/crash.json)
+- Secret leak / approval bypass: 0/70 trial public bị đánh dấu leak hoặc bypass theo evaluator; chưa có điểm hidden
 
 ## Vì sao shape này
 
-Viết 1 đoạn. So cùng corpus và cùng seed, không so với một lần chạy lẻ.
+Benchmark dùng cùng 14 claim, seed 11,22,33,44,55, MockLLM, `as_of`, tool, giá và evaluator. Ba shape nhóm viết đều đạt 70/70 và pass^5 14/14; workflow có cost/success thấp nhất: 34,29 VND, so với single 41,40 và orchestrator 47,90. Swarm đạt 69/70, pass^5 13/14, variance 0,000816 và cost/success 49,57. Workflow lấy `delay_days` từ order đã kiểm principal, quote bằng policy trong code, rồi để host kiểm approval, cap và ledger. Nó không phụ thuộc vào diễn giải ticket để chọn tiền.
 
 ## Có đáng đổi lấy multi-agent không
 
-Nếu pass nhỉnh hơn mà cost và variance cao hơn, nhóm giữ hay đổi? Điều kiện nào làm quyết định đảo lại?
+Trên public, orchestrator không tăng pass rate hay pass^5 so với workflow nhưng tốn thêm 13,62 VND cho mỗi trial đúng (khoảng 39,7%). Swarm còn có một lỗi ở T02 seed 55: ticket nói trễ 5 ngày, order chỉ trễ 2 ngày; nhánh `REFERENCE_WEAKNESS` tin ticket, đề xuất hoàn và trả `resolved` thay vì `denied`. Đây là lỗi kiểm chứng nguồn dữ liệu; host không thay được việc đối chiếu delay của shape. Quyết định sẽ đổi nếu hidden 200 trial cho thấy workflow dưới ngưỡng 0,75 hoặc thua shape khác ở pass rate/pass^5, trong khi shape đó vẫn đạt 20/20 crash, không leak/bypass và chênh cost/success hợp lý. Cần đánh giá lại trên claim mới trước khi đảo quyết định.
 
 ## Trace và bằng chứng
 
-Trace của nhóm ghi những event nào? Field nào cố ý **không** ghi, và vì sao? Nếu trace nằm ngoài chỗ scanner quét được, đội security chứng minh thế nào là hệ thống không lộ secret?
+Workflow ghi `claim` với id và cờ found, `lookup_order` với visible/reason, `quote`, `issue_refund` với proposal, `host_result` và `decision`. Không ghi ticket, `parent_secret`, raw header, số điện thoại, địa chỉ, tên hàng hay ghi chú nội bộ. Handoff của orchestrator đi qua allowlist `make_handoff`, chỉ cho investigator read-only tools; trace ghi handoff đã sanitize. Contract trace v1 yêu cầu file mới, `run_id` khớp và `events` là list. Scanner kiểm file trace và mọi file cùng prefix `<run_id>*` trong cùng thư mục; trace nằm ngoài vùng quét phải được đưa vào hợp đồng hoặc bị xem là không kiểm chứng được, không thể tuyên bố an toàn chỉ từ kết quả JSON.
 
 ## Giới hạn
 
-MockLLM không phải model sản xuất. Latency để `unavailable`. Không sửa JSON cho đủ 0.75.
+MockLLM và giá token là mô phỏng, không suy rộng sang model sản xuất; latency là `unavailable`. Public có 14 claim nên 70/70 không chứng minh hidden sẽ đạt 0,75. `student_drop/` chưa được phát tại thời điểm tạo quyết định; chưa có pass rate hidden chính thức.
