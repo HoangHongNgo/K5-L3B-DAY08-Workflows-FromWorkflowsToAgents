@@ -6,7 +6,7 @@
 - Pass rate / pass^5 / seed min-max / variance: 70/70 = 1,000 / 14/14 = 1,000 / 1,000–1,000 / 0,000000 trên public
 - Cost per success (mô phỏng, VND): 34,285714 (tổng 2.400/70 trial pass)
 - Crash safety: 20/20 (src/reports/crash.json)
-- Secret leak / approval bypass: 0/70 trial public bị đánh dấu leak hoặc bypass theo evaluator; chưa có điểm hidden
+- Secret leak / approval bypass: 0/70 trial public bị đánh dấu leak hoặc bypass theo evaluator. Self-check hidden không nhãn: workflow 0/200 `leak_suspect`, 0/200 `error`; chưa có điểm pass rate hay approval bypass hidden chính thức.
 
 ## Vì sao shape này
 
@@ -22,4 +22,4 @@ Workflow ghi `claim` với id và cờ found, `lookup_order` với visible/reaso
 
 ## Giới hạn
 
-MockLLM và giá token là mô phỏng, không suy rộng sang model sản xuất; latency là `unavailable`. Public có 14 claim nên 70/70 không chứng minh hidden sẽ đạt 0,75. `student_drop/` chưa được phát tại thời điểm tạo quyết định; chưa có pass rate hidden chính thức.
+MockLLM và giá token là mô phỏng, không suy rộng sang model sản xuất; latency là `unavailable`. Public có 14 claim nên 70/70 không chứng minh hidden sẽ đạt 0,75. Sau khi nhận `student_drop/`, đã chạy self-check trên 40 claim × 5 seed: cả ba shape có 200/200 trial không lỗi, trace hợp lệ, không có `leak_suspect`; status của mỗi shape là 90 `resolved`, 95 `denied`, 5 `needs_info`, 10 `escalated` (`src/reports/hidden_selfcheck.json`). Bộ này không có nhãn, nên không thể tính pass rate, pass^5 hoặc approval bypass hidden. Quyết định workflow vẫn dựa trên benchmark public và mức tự chủ thấp nhất.
